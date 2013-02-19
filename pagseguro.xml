@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<install version="1.0" type="plugin" group="vmpayment" method="upgrade">
+    <name>Pagseguro</name>
+    <creationDate>Fevereiro 2013</creationDate>
+    <author>S2IT Solutions Consultoria LTDA.</author>
+    <authorUrl>http://www.s2it.com.br/</authorUrl>
+    <copyright>Copyright (C) S2IT Solutions Consultoria LTDA. All rights reserved.</copyright>
+    <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+    <version>2.0.18a</version>
+    <description>
+        <![CDATA[
+            <a href="https://pagseguro.uol.com.br/" target="_blank">PagSeguro</a> é a solução completa para pagamentos online.
+        ]]>
+    </description>
+    <files>
+        <filename plugin="pagseguro">pagseguro.php</filename>
+        <filename>index.html</filename>
+        <folder>PagSeguroLibrary</folder>
+    </files>
+    <media folder="images" destination="./../images/stories/virtuemart/payment">
+        <filename>pagseguro.jpg</filename>
+        <filename>pagsegurologo.jpg</filename>
+    </media>
+    <params addpath="/administrator/components/com_virtuemart/elements" >
+        <param  type="vmjpluginwarning" />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="spacer" 
+                default="Aqui são definidas as configurações para que o módulo funcione corretamente." 
+                level="level1" 
+        />
+        <param	name="payment_logos" 
+                type="vmfiles" 
+                label="VMPAYMENT_STANDARD_LOGOS"
+             	description="VMPAYMENT_STANDARD_LOGOS_DESC"
+             	directory="/images/stories/virtuemart/payment"
+             	default="default" hide_default="1" hide_none="1"
+             	stripext="0"  exclude="^_" 
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="text" 
+                name="pagseguro_email"  
+                size="55" 
+                label="Informe o email:"
+                default="your@email.com" 
+                description="Email cadastrado no PagSeguro. Caso ainda não possua cadastro, &lt;a href='https://pagseguro.uol.com.br/' target='_blank'&gt;clique aqui&lt;/a&gt;." 
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="text" 
+                name="pagseguro_token"  
+                size="55" 
+                label="Informe seu token"
+                default="your_token_here" 
+                description="Token gerado no PagSeguro para validar as transações realizadas. Caso ainda não tenha gerado o seu, &lt;a href='https://pagseguro.uol.com.br/integracao/token-de-seguranca.jhtml' target='_blank'&gt;clique aqui&lt;/a&gt;."
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="radio"
+                name="pagseguro_charset"
+                label="Selecione a codificação de caracteres de sua aplicação" 
+                default="UTF-8" 
+                description="Especifica a codificação de caracteres usada nos parâmetros enviados. É importante que se informe a codificação correta do seu sistema para que não haja problemas com as transações." >
+            <option value="UTF-8">UTF-8</option>
+            <option value="ISO-8859-1">ISO-8859-1</option>
+        </param>
+        <param  type="spacer" default="" level="level1" />
+        <param  type="text" 
+                name="pagseguro_url_redirect"
+                label="Informe uma url para redirecionamento após o pagamento no PagSeguro:" 
+                size="55"
+                default=""
+                description="Determina a URL para a qual o comprador será redirecionado após o final do fluxo de pagamento. Este parâmetro permite que seja informado um endereço de específico para cada pagamento realizado. &lt;a href='https://pagseguro.uol.com.br/v2/guia-de-integracao/finalizacao-do-pagamento.html#v2-item-redirecionando-o-comprador-para-uma-url-dinamica' target='_blank'&gt;Clique aqui&lt;/a&gt; e saiba mais." 
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="radio" 
+                name="pagseguro_log"
+                label="Deseja gravar log das transações realizadas com o PagSeguro ?"
+                default="0"
+                description="Permite que você escolha se o plugin gerará ou não log para as transações realizadas com o PagSeguro.">
+            <option value="0">COM_VIRTUEMART_NO</option>
+            <option value="1">COM_VIRTUEMART_YES</option>
+        </param>
+        <param  type="spacer" default="" level="level1" />
+        <param  type="text"
+                name="pagseguro_log_file_name"
+                label="Informe o nome do arquivo de log:" 
+                size="55"
+                default=""
+                description="Caso a criação de logs esteja ativa, serão gerados registros para as transações com o PagSeguro no arquivo que você definir nesse campo. Esse arquivo ficará no diretório logs do seu sistema."
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  type="spacer" 
+                default="Status da compra. Entenda melhor &lt;a href='http://blogpagseguro.com.br/2010/03/entenda-o-status-da-transacao/' target='_blank'&gt;clicando aqui&lt;/a&gt;" 
+        />
+        <param  type="spacer" default="" level="level1" />
+        <param  name="status_waiting_payment" 
+                type="vmorderstate" 
+                default="P"  
+                label="Aguardando Pagamento" 
+                description="O comprador iniciou a transação, mas até o momento o PagSeguro não recebeu nenhuma informação sobre o pagamento." 
+        />
+        <param  name="status_in_analisys" 
+                type="vmorderstate" 
+                default="P"  
+                label="Em análise" 
+                description="O comprador optou por pagar com um cartão de crédito e o PagSeguro está analisando o risco da transação." 
+        />
+        <param  name="status_paid" 
+                type="vmorderstate" 
+                default="U"  
+                label="Pago" 
+                description="A transação foi paga pelo comprador e o PagSeguro já recebeu uma confirmação da instituição financeira responsável pelo processamento." 
+        />
+        <param  name="status_available" 
+                type="vmorderstate" 
+                default="C"  
+                label="Disponível" 
+                description="A transação foi paga e chegou ao final de seu prazo de liberação sem ter sido retornada e sem que haja nenhuma disputa aberta." 
+        />
+        <param  name="status_in_dispute" 
+                type="vmorderstate" 
+                default="P" 
+                label="Em disputa" 
+                description="O comprador, dentro do prazo de liberação da transação, abriu uma disputa." 
+        />
+        <param  name="status_refunded" 
+                type="vmorderstate" 
+                default="R" 
+                label="Devolvido" 
+                description="O valor da transação foi devolvido para o comprador." 
+        />
+        <param  name="status_cancelled" 
+                type="vmorderstate" 
+                default="X" 
+                label="Cancelado" 
+                description="A transação foi cancelada sem ter sido finalizada." 
+        />
+    </params>
+</install>
