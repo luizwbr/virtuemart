@@ -582,7 +582,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * Retrieve PagSeguro PrestaShop module version
      */
     private function _setPagSeguroModuleVersion(){
-        PagSeguroLibrary::setModuleVersion('virtuemart-v'.self::$_moduleVersion);
+        PagSeguroLibrary::setModuleVersion('virtuemart-v.'.self::$_moduleVersion);
     }
     
     /**
