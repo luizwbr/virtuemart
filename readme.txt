@@ -1,5 +1,5 @@
 -------------------------------------------------
-Módulo de integração PagSeguro para Joomla/VirtueMart
+Módulo de integração PagSeguro para VirtueMart
 v1.0
 -------------------------------------------------
 
@@ -25,7 +25,7 @@ Com o módulo instalado e configurado, você pode pode oferecer o PagSeguro como o
 
 	- Certifique-se de que não há instalação de outros módulos para o PagSeguro em seu sistema;
 	- Baixe o repositório como arquivo zip ou faça um clone;
-	- Na área administrativa do seu sistema, acesse o menu Extension > Extension Manager, no campo Package File aponte para o caminho do arquivo pagseguro.zip e em seguida selecione Upload & Install;
+	- Na área administrativa do seu sistema, acesse o menu Extension > Extension Manager, no campo Package File aponte para o caminho do arquivo .zip que foi baixado e em seguida selecione Upload & Install;
 	- Acesse o menu Extension -> Plugin Manager, localize e selecione o módulo PagSeguro e em seguida defina o Status como Enabled.
 
 
