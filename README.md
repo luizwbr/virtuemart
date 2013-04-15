@@ -50,7 +50,7 @@ Salve as configurações e clique na aba Configuration. As opções disponíveis
  - **log**: ativa/desativa a geração de logs.
  - **diretório**: informe o local a partir da raíz de instalação do Joomla onde se deseja criar o arquivo de log. Ex.: /logs/ps.log. Caso não informe nada, o log será gravado dentro da pasta ../PagSeguroLibrary/PagSeguro.log.
 
-Opcionalmente você pode mudar o relacionamento feito entre os status de pagamento no PagSeguro com os status de pagamento dentro de sua loja. Para mais informações acesse nossa documentação sobre [status de transações].
+Opcionalmente você pode mudar o relacionamento feito entre os status de pagamento no PagSeguro com os status de pagamento dentro de sua loja. Para mais informações, consulte a [máquina de estados] que descreve os status de transação no PagSeguro e as possíveis transições entre eles.
 
 Changelog
 ---------
@@ -103,6 +103,7 @@ Achou e corrigiu um bug ou tem alguma feature em mente e deseja contribuir?
   [Dúvidas?]: https://pagseguro.uol.com.br/desenvolvedor/comunidade.jhtml
   [Pagamentos via API]: https://pagseguro.uol.com.br/integracao/pagamentos-via-api.jhtml
   [Notificação de Transações]: https://pagseguro.uol.com.br/integracao/notificacao-de-transacoes.jhtml
+  [máquina de estados]: https://pagseguro.uol.com.br/v2/guia-de-integracao/api-de-notificacoes.html#v2-item-api-de-notificacoes-status-da-transacao
   [Joomla]: http://www.joomla.org/
   [VirtueMart]: http://virtuemart.net/
   [PHP]: http://www.php.net/
