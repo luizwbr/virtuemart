@@ -1,36 +1,48 @@
 <?php
 
+/*
+************************************************************************
+Copyright [2013] [PagSeguro Internet Ltda.]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+************************************************************************
+*/
+
 defined('_JEXEC') or die('Restricted access');
 
-/**
- *
- * a special type of 'pagseguro ':
- *
- * @author Wellington Camargo
- * @version $Id: pagseguro.php 5177 2013-01-23$
- * @package VirtueMart
- * @subpackage payment
- * @copyright Copyright (C) 2013 S2IT Solutions Consultoria LTDA - All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * VirtueMart is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
- * See /administrator/components/com_virtuemart/COPYRIGHT.php for copyright notices and details.
- *
- * http://virtuemart.org
- */
 if (!class_exists('vmPSPlugin')) {
     require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
 }
 
 class plgVmPaymentPagseguro extends vmPSPlugin {
 
-    // instance of class
+    /**
+     * The instance of class
+     * @var object 
+     */
     public static $_this = FALSE;
-    private static $_moduleVersion = '1.0';
+
+    /**
+     * The plugin version
+     * @var string 
+     */
+    private static $_pluginVersion = '1.1';
     
-    
+    /**
+     * The constructor
+     * @param type $subject
+     * @param type $config
+     */
     public function __construct(&$subject, $config) {
         
         parent::__construct($subject, $config);
@@ -53,11 +65,18 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         require_once 'PagSeguroLibrary/PagSeguroLibrary.php';
     }
     
-
+    /**
+     * Create table sql for PagSeguro Payment Plugin
+     * @return String
+     */
     public function getVmPluginCreateTableSQL() {
         return $this->createTableSQL('Payment PagSeguro Table');
     }
-
+    
+    /**
+     * Table fields for PagSeguro Payment Plugin
+     * @return Array
+     */
     public function getTableSQLFields() {
         return array(
             'id'                            => 'int(11) UNSIGNED NOT NULL AUTO_INCREMENT',
@@ -69,31 +88,38 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
             'payment_currency'              => 'char(3) ',
             'cost_per_transaction'          => 'decimal(10,2) DEFAULT NULL',
             'cost_percent_total'            => 'decimal(10,2) DEFAULT NULL',
-            'tax_id'                        => 'smallint(11) DEFAULT NULL'
+            'tax_id'                        => 'smallint(11) DEFAULT NULL',
+            'reference'                     => 'char(32) DEFAULT NULL'
         );
     }
 
+    /**
+     * Get util variables for PagSeguro Payment Plugin
+     * @return Array
+     */
     private function _getPagSeguroVarsToPush() {
         return array(
-            'pagseguro_email'           => array('', 'string'),
-            'pagseguro_token'           => array('', 'string'),
-            'pagseguro_charset'         => array('', 'string'),
-            'pagseguro_url_redirect'    => array('', 'string'),
-            'pagseguro_log'             => array('', 'int'),
-            'pagseguro_log_file_name'   => array('', 'string'),
-            'status_waiting_payment'    => array('', 'char'),
-            'status_in_analisys'        => array('', 'char'),
-            'status_paid'               => array('', 'char'),
-            'status_available'          => array('', 'char'),
-            'status_in_dispute'         => array('', 'char'),
-            'status_refunded'           => array('', 'char'),
-            'status_cancelled'          => array('', 'char')
+            'pagseguro_email'               => array('', 'string'),
+            'pagseguro_token'               => array('', 'string'),
+            'pagseguro_charset'             => array('', 'string'),
+            'pagseguro_url_redirect'        => array('', 'string'),
+            'pagseguro_url_notification'    => array('', 'string'),
+            'pagseguro_log'                 => array('', 'int'),
+            'pagseguro_log_file_name'       => array('', 'string'),
+            'payment_logos'                 => array('', 'char'),
+            'status_waiting_payment'        => array('', 'char'),
+            'status_in_analysis'            => array('', 'char'),
+            'status_paid'                   => array('', 'char'),
+            'status_available'              => array('', 'char'),
+            'status_in_dispute'             => array('', 'char'),
+            'status_refunded'               => array('', 'char'),
+            'status_cancelled'              => array('', 'char')
         );
     }
 
     /**
      * plgVmDisplayListFEPayment
-     * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for exampel
+     * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for example
      *
      * @param object  $cart Cart object
      * @param integer $selected ID of the method selected
@@ -104,9 +130,37 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * @author Max Milbers
      */
     public function plgVmDisplayListFEPayment(VirtueMartCart $cart, $selected = 0, &$htmlIn) {
-        return $this->displayListFE($cart, $selected, $htmlIn);
+        
+        if (PagSeguroCurrencies::checkCurrencyAvailabilityByIsoCode(shopFunctions::getCurrencyByID($cart->pricesCurrency, 'currency_code_3'))){
+            return $this->displayListFE($cart, $selected, $htmlIn);
+        }
+        return false;
     }
 
+    /**
+     * displays the logos of a VirtueMart plugin
+     *
+     * @author Valerie Isaksen
+     * @author Max Milbers
+     * @param array $logo_list
+     * @return html with logos
+     */
+    protected function displayLogos($logo_list) {
+
+        $img = "";
+
+        if (!(empty($logo_list))) {
+            
+            $url = JURI::root () . '/media/images/stories/virtuemart/' . $this->_psType . '/';
+            if (!is_array ($logo_list)) { $logo_list = (array)$logo_list; }
+            foreach ($logo_list as $logo) {
+                    $alt_text = substr ($logo, 0, strpos ($logo, '.'));
+                    $img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . $logo . '"  alt="' . $alt_text . '" /></span> ';
+            }
+        }
+        return $img;
+    }    
+    
     /**
      * Add required classes to order payment
      */
@@ -131,7 +185,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * @return bool|null
      */
     function plgVmConfirmedOrder($cart, $order) {
-
+        
         if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
             return NULL; // Another method was selected, do nothing
         }
@@ -139,6 +193,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         if (!$this->selectedThisElement($method->payment_element)) {
             return FALSE;
         }
+        
         $this->_debug = $method->debug;
         $this->logInfo('PagSeguro plgVmConfirmedOrder order number: ' . $order['details']['BT']->order_number, 'message');
 
@@ -153,7 +208,6 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
 
         // getting order data
         $this->getPaymentCurrency($method);
-        $currency_code_3 = shopFunctions::getCurrencyByID($method->payment_currency, 'currency_code_3');
         $paymentCurrency = CurrencyDisplay::getInstance($method->payment_currency);
         $totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, FALSE), 2);
 
@@ -164,26 +218,66 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         $dbValues['virtuemart_paymentmethod_id'] = $this->_virtuemart_paymentmethod_id;
         $dbValues['cost_per_transaction'] = (!empty($method->cost_per_transaction) ? $method->cost_per_transaction : 0);
         $dbValues['cost_percent_total'] = (!empty($method->cost_percent_total) ? $method->cost_percent_total : 0);
-        $dbValues['payment_currency'] = $currency_code_3;
+        $dbValues['payment_currency'] = PagSeguroCurrencies::getIsoCodeByName('REAL');
         $dbValues['payment_order_total'] = $totalInPaymentCurrency;
         $dbValues['tax_id'] = $method->tax_id;
+        $dbValues['reference'] = $order['details']['BT']->virtuemart_order_id;
+        
+		// storing data order into plugin data table
         $this->storePSPluginInternalData($dbValues);
         
         // performing PagSeguro transaction
         $pagSeguroPaymentRequest = $this->_generatePagSeguroRequestData($cart, $order, $method);
         $url = $this->_performPagSeguroRequest($pagSeguroPaymentRequest, $method);
-        
-        // if not created a valid url, order isn't finalized (0), else order is finalized (1)
-        $returnValue = (!$url) ? 0 : 1;
 
-        $html .= '<a href="'.$url.'" target="_blank" >Ir para o PagSeguro</a>';
-        
         // setting new order status
         $newStatus = $method->status_waiting_payment;
         
-        return $this->processConfirmedOrderPaymentResponse($returnValue, $cart, $order, $html, $dbValues['payment_name'], $newStatus);
+        // processing PagSeguro response
+        $this->_processPagSeguroPaymentResponse($url, $cart, $order, $dbValues['payment_name'], $newStatus);
+        
     }
 
+    /**
+     * Proccess PagSeguro response
+     * If a valid url , redirect to PagSeguro
+     * else, show and error page
+     * @param String $url
+     * @param VirtueMartCart $cart
+     * @param Array $order
+     * @param String $payment_name
+     * @param String $newStatus
+     */
+    private function _processPagSeguroPaymentResponse($url, VirtueMartCart $cart, Array $order, $payment_name, $newStatus){
+        
+         $application = JFactory::getApplication();
+        
+        if (filter_var($url, FILTER_VALIDATE_URL)){
+            // We delete the old stuff
+            // send the email only if payment has been accepted
+            // update status
+
+            $modelOrder = VmModel::getModel ('orders');
+            $order['order_status'] = $newStatus;
+            $order['customer_notified'] = 1;
+            $order['comments'] = '';
+            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+            $order['paymentName'] = $payment_name;
+
+            // We delete the old stuff
+            $cart->emptyCart();
+            
+            // Redirecting to PagSeguro
+            $application = JFactory::getApplication();
+            $application->redirect($url);
+        }
+        else {
+            // error while processing the payment
+            $application->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'), JText::_ ('COM_VIRTUEMART_CART_ORDERDONE_DATA_NOT_VALID'));
+        }
+        
+    }
+    
     /**
      * Get payment currency
      * @param type $virtuemart_paymentmethod_id
@@ -348,7 +442,6 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * @return bool|null
      */
     public function plgVmonSelectedCalculatePricePayment(VirtueMartCart $cart, array &$cart_prices, &$cart_prices_name) {
-       //echo '<pre>';print_r($cart_prices);exit();
 	return $this->onSelectedCalculatePrice($cart, $cart_prices, $cart_prices_name);
     }
 
@@ -408,6 +501,190 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         return $this->setOnTablePluginParams($name, $id, $table);
     }
     
+    /*
+    * plgVmOnPaymentNotification() - This event is fired by Offline Payment. It can be used to validate the payment data as entered by the user.
+    * Return:
+    * Parameters:
+    * None
+    * @author Valerie Isaksen
+    */
+    function plgVmOnPaymentNotification () {
+
+		$post = $_POST;
+
+        if (!PagSeguroHelper::isNotificationEmpty($post)){
+            
+            $notificationType = new PagSeguroNotificationType($post['notificationType']);
+
+            $strType = $notificationType->getTypeFromValue();
+
+            switch ($strType) {
+
+                case 'TRANSACTION':
+                    $this->_doUpdateByNotification($post['notificationCode']);
+                    break;
+
+                default:
+                    LogPagSeguro::error("Unknown notification type [" . $notificationType->getValue() . "]");
+            }
+
+        } else {
+
+            LogPagSeguro::error("Invalid notification parameters.");
+        }
+        
+    }
+   
+    /**
+     * Gets the redirect url
+     * @param type $redirectUrl
+     * @return string
+     */
+    private function _getRedirectUrl($redirectUrl){
+        if (PagSeguroHelper::isEmpty($redirectUrl)){
+            $redirectUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived');
+        }
+        
+        return $redirectUrl;
+    }
+    
+    /**
+     * Gets PagSeguro plugin notification url
+     * if empty the url configured in plugin configuration area, return default plugin url notification
+     * @return string
+     */
+    private function _getNotificationUrl($notificationUrl){
+        if (PagSeguroHelper::isEmpty($notificationUrl)){
+            $notificationUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&tmpl=component');
+        }
+        
+        return $notificationUrl;
+    }
+    
+    /**
+     * Perform update by received PagSeguro notification
+     * @param string $notificationCode
+     */
+    private function _doUpdateByNotification($notificationCode) {
+        // getting configuration params data 
+        $paramsData = $this->_getParamsData();
+        
+    	try {
+            // getting credentials data
+            $credentials = new PagSeguroAccountCredentials($paramsData['pagseguro_email'], $paramsData['pagseguro_token']);
+            // getting transaction data object
+            $transaction = PagSeguroNotificationService::checkTransaction($credentials, $notificationCode);
+            // getting PagSeguro status number
+            $statusPagSeguro = $transaction->getStatus()->getValue();
+            // getting new order state
+            $newStatus = $this->_getAssociatedStatus($paramsData, $statusPagSeguro);
+            // getting status translation
+            $statusTranslation = $this->_getStatusTranslation($statusPagSeguro);
+            // performing update status
+            if (!PagSeguroHelper::isEmpty($newStatus)){
+                $this->_updateOrderStatus($transaction->getReference(), $newStatus, $statusTranslation);
+            }
+                
+    	} catch (PagSeguroServiceException $e) {
+            LogPagSeguro::error("Error trying get transaction [" . $e->getMessage() . "]");
+    	}
+
+    }
+    
+    /**
+     * Gets PagSeguro translation for status
+     * @param int $status
+     * @param string $language
+     * @return string The translated status.
+     */
+    private function _getStatusTranslation($statusPagSeguro, $language = 'br'){
+        // including translation class
+        include_once 'pagseguroorderstatustranslation.php';
+        return PagSeguroOrderStatusTranslation::getStatusTranslation($this->_getStatusString($statusPagSeguro), $language);
+    }
+    
+    /**
+     * Gets the status string description for $statusPagSeguro
+     * @param int $statusPagSeguro
+     * @return string
+     */
+    private function _getStatusString($statusPagSeguro){
+        $transactionStatus = new PagSeguroTransactionStatus($statusPagSeguro);
+        return $transactionStatus->getTypeFromValue();
+    }
+    
+    /**
+     * Check if haystack starts with needle
+     * @param string $haystack
+     * @param string $needle
+     * @return boolean
+     */
+    private function _startswith($haystack, $needle) {
+        return strpos($haystack, $needle) === 0;
+    }
+    
+    /**
+     * Gets the associated VirtueMart PagSeguro plugin configuration status with PagSeguro received status
+     * if find, return the status code, else, return NULL
+     * 
+     * @param array $paramsData
+     * @param string $statusPagSeguro
+     * @return mixed
+     */
+    private function _getAssociatedStatus(Array $paramsData, $statusPagSeguro){
+        
+        $statusList = array();
+        
+        foreach ($paramsData as $key => $value) {
+            
+            if ($this->_startswith($key, 'status_')){
+                $statusList[strtoupper(str_replace('status_', '', $key))] = $value;
+            }
+        }
+        
+        $statusString = $this->_getStatusString($statusPagSeguro);
+
+        return (isset($statusList[$statusString])) ? $statusList[$statusString] : NULL;
+    }
+    
+    /**
+     * Gets the PagSeguro plugin configured values
+     * @return array
+     */
+    private function _getParamsData(){
+        
+        $paramsData = array();
+        
+        $db = JFactory::getDBO();
+        $db->setQuery('SELECT `payment_params` FROM `#__virtuemart_paymentmethods` WHERE `payment_element`="pagseguro" ');
+        $data = explode('|', $db->loadResult());
+        
+        foreach ($data as $param) {
+            if (!PagSeguroHelper::isEmpty($param)){
+                $array_temp = explode('=', $param);
+                $paramsData[$array_temp[0]] = str_replace('"', '', $array_temp[1]);
+            }
+        }
+        
+        return $paramsData;
+    }
+    
+    /**
+     * Do the update order status in the system
+     * @param int $reference
+     * @param char $newStatus
+     */
+    private function _updateOrderStatus($reference, $newStatus, $statusTranslation){
+        
+        $model = VmModel::getModel('orders');
+        
+        $inputOrder = array('order_status' => $newStatus,
+                            'customer_notified' => TRUE,
+                            'comments' => '['.$statusTranslation.']');
+
+        return $model->updateStatusForOneOrder($reference, $inputOrder);
+    }
+    
     /**
     * Perform currency conversion to float
     * @param $method
@@ -416,39 +693,41 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         $method->min_amount = (float)$method->min_amount;
         $method->max_amount = (float)$method->max_amount;
     }
-    
-    /**
-     * Get order currency iso code 3
-     * @param type $currencyID
-     * @return type
-     */
-    private function _getCurrencyIsoCode3($currencyID){
-        $db = JFactory::getDbo();
-        $sql = "select currency_code_3 from #__virtuemart_currencies where virtuemart_currency_id=".$currencyID;
-        $db->setQuery($sql);
-        return $db->loadResult();
-    }
 
     /**
      * Generates PagSeguro request data
      * @param VirtueMartCart $cart
      * @param array $order
      * @param TablePaymentmethods $method
-     * @return \PagSeguroPaymentRequest
+     * @return PagSeguroPaymentRequest
      */
-    private function _generatePagSeguroRequestData(VirtueMartCart $cart, Array $order, TablePaymentmethods $method, $Cart_Prices){
+    private function _generatePagSeguroRequestData(VirtueMartCart $cart, Array $order, TablePaymentmethods $method){
         
         $paymentRequest = new PagSeguroPaymentRequest();
-        $paymentRequest->setCurrency($this->_getCurrencyIsoCode3($method->payment_currency)); // currency
-        $paymentRequest->setReference($order['details']['BT']->order_number); // reference
-        $paymentRequest->setRedirectURL($method->pagseguro_url_redirect); // redirect url
+        $paymentRequest->setCurrency(PagSeguroCurrencies::getIsoCodeByName('REAL')); // currency
+        $paymentRequest->setReference($order['details']['BT']->virtuemart_order_id); // reference
+        $paymentRequest->setRedirectURL($this->_getRedirectUrl($method->pagseguro_url_redirect)); // redirect url
+        $paymentRequest->setNotificationURL($this->_getNotificationUrl($method->pagseguro_url_notification)); // notification url
         $paymentRequest->setItems($this->_generateProductsData($cart)); // products
-
+        $paymentRequest->setExtraAmount($this->_getExtraAmountValues($cart)); // extra values
+        
         $sender = (isset($order['details']['ST']) && (count($order['details']['ST'] > 0)) ? $order['details']['ST'] : $order['details']['BT']); 
         $paymentRequest->setSender($this->_generateSenderData($sender)); // sender
+
         $paymentRequest->setShipping($this->_generateShippingData($sender)); // shipping
         
         return $paymentRequest;
+    }
+    
+    /**
+     * Gets extra amount cart values (coupon and shipping)
+     */
+    private function _getExtraAmountValues(VirtueMartCart $cart){
+        
+        $shipping = (float)$cart->pricesUnformatted['salesPriceShipment'];
+        $coupon = (float)$cart->pricesUnformatted['salesPriceCoupon'];
+        
+        return PagSeguroHelper::decimalFormat($shipping - $coupon);
     }
     
     /**
@@ -465,7 +744,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
             
             $pagSeguroItem = new PagSeguroItem();
             $pagSeguroItem->setId($cont++);
-            $pagSeguroItem->setDescription($this->_truncateValue($product->product_name, 255)); 
+            $pagSeguroItem->setDescription($product->product_name);
             $pagSeguroItem->setQuantity($product->quantity);           
             $pagSeguroItem->setAmount(number_format( $this->calculePrice($cart, $key) , 2));
             $pagSeguroItem->setWeight((int)ShopFunctions::convertWeigthUnit($product->product_weight, $product->product_weight_uom, 'G')); // defines weight in gramas
@@ -485,7 +764,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         
         if (isset($sender) && !is_null($sender)){
             $pagSeguroSender->setEmail($sender->email);
-            $pagSeguroSender->setName($this->_truncateValue(trim($sender->first_name). ' ' . trim($sender->last_name), 50, ''));
+            $pagSeguroSender->setName($sender->first_name. ' ' . $sender->last_name);
         }
         
         return $pagSeguroSender;
@@ -528,8 +807,8 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
             $address->setPostalCode($deliveryAddress->zip);
             $address->setStreet($deliveryAddress->address_1);
             $address->setDistrict($deliveryAddress->address_2);
-            $address->setCountry($this->_getColumValue('virtuemart_countries', 'country_3_code', 'virtuemart_country_id', $deliveryAddress->virtuemart_country_id));
-            $address->setState($this->_getColumValue('virtuemart_states', 'state_2_code', 'virtuemart_state_id', $deliveryAddress->virtuemart_state_id));
+            $address->setCountry($this->_getColumnValue('virtuemart_countries', 'country_3_code', 'virtuemart_country_id', $deliveryAddress->virtuemart_country_id));
+            $address->setState($this->_getColumnValue('virtuemart_states', 'state_2_code', 'virtuemart_state_id', $deliveryAddress->virtuemart_state_id));
         }
         
         return $address;
@@ -537,7 +816,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
 
     /**
      *  Perform PagSeguro request and return url from PagSeguro
-     *  @return mixed - if is a valid url, return url string, else return false
+     *  @return string
      */
     private function _performPagSeguroRequest(PagSeguroPaymentRequest $pagSeguroPaymentRequest, TablePaymentmethods $method){
         
@@ -545,14 +824,17 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
             // setting PagSeguro configurations
             $this->_setPagSeguroConfiguration($method);
             
-            // setting PagSeguro Prestashop module version
+            // setting PagSeguro plugin version
             $this->_setPagSeguroModuleVersion();
+            
+            // setting VirtueMart version
+            $this->_setPagSeguroCMSVersion();
             
             // getting credentials
             $credentials = new PagSeguroAccountCredentials($method->pagseguro_email, $method->pagseguro_token);
 
-            // get PagSeguro request return and verify if is a valid url
-            return filter_var($pagSeguroPaymentRequest->register($credentials), FILTER_VALIDATE_URL);
+            // return performed PagSeguro request values
+            return $pagSeguroPaymentRequest->register($credentials);
             
         }
         catch(PagSeguroServiceException $e){
@@ -579,10 +861,17 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
     }
     
     /**
-     * Retrieve PagSeguro PrestaShop module version
+     * Sets PagSeguro plugin version
      */
     private function _setPagSeguroModuleVersion(){
-        PagSeguroLibrary::setModuleVersion('virtuemart-v.'.self::$_moduleVersion);
+        PagSeguroLibrary::setModuleVersion('virtuemart-v'.self::$_pluginVersion);
+    }
+    
+    /**
+     * Sets VirtueMart version
+     */
+    private function _setPagSeguroCMSVersion(){
+        PagSeguroLibrary::setCMSVersion('virtuemart-v.'.vmVersion::$RELEASE);
     }
     
     /**
@@ -608,33 +897,11 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * @param type $currencyID
      * @return type
      */
-    private function _getColumValue($table, $select, $where, $value){
+    private function _getColumnValue($table, $select, $where, $value){
         $db = JFactory::getDbo();
         $sql = "select $select from #__$table where $where=".$value;
         $db->setQuery($sql);
         return $db->loadResult();
-    }
-    
-    /**
-     * Perform truncate of string value
-     * @param string $string
-     * @param type $limit
-     * @param type $endchars
-     * @return string
-     */
-    private function _truncateValue($string, $limit, $endchars = '...'){
-        
-        if (!is_array($string) || !is_object($string)){
-            
-            $stringLength = strlen($string);
-            $endcharsLength  = strlen($endchars);
-            
-            if ($stringLength > (int)$limit){
-                $cut = (int)($limit - $endcharsLength);
-                $string = substr($string, 0, $cut).$endchars;
-            }
-        }
-        return $string;
     }
     
     /**

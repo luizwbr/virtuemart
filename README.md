@@ -46,6 +46,7 @@ Salve as configurações e clique na aba Configuration. As opções disponíveis
  - **e-mail**: e-mail cadastrado no PagSeguro.
  - **token**: token cadastrado no PagSeguro.
  - **url de redirecionamento**: ao final do fluxo de pagamento no PagSeguro, seu cliente será redirecionado automaticamente para a página de confirmação em sua loja ou então para a URL que você informar neste campo. Para ativar o redirecionamento ao final do pagamento é preciso ativar o serviço de [Pagamentos via API].
+ - **url de notificação**: para receber e processar automaticamente os novos status das transações com o PagSeguro você deve ativar o serviço de [Notificação de Transações] e informar a URL que aparece dentro da tela de configurações do módulo.
  - **charset**: codificação do seu sistema (ISO-8859-1 ou UTF-8).
  - **log**: ativa/desativa a geração de logs.
  - **diretório**: informe o local a partir da raíz de instalação do Joomla onde se deseja criar o arquivo de log. Ex.: /logs/ps.log. Caso não informe nada, o log será gravado dentro da pasta ../PagSeguroLibrary/PagSeguro.log.
@@ -55,6 +56,13 @@ Opcionalmente você pode mudar o relacionamento feito entre os status de pagamen
 Changelog
 ---------
 ---
+1.1
+
+ - Adicionado: Integração com API de Notificação;
+ - Correção: Exibição do logo;
+ - Correção: Redirecionamento automático para o PagSeguro ao finalizar a compra no sistema;
+ - Correção: Envio de valores de frete;
+
 1.0
 
  - Versão inicial. Integração com API de checkout do PagSeguro.
