@@ -174,8 +174,13 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         }
 
         if (!class_exists('TableVendors')) {
-            require(JPATH_VM_ADMINISTRATOR . DS . 'table' . DS . 'vendors.php');
+            require(JPATH_VM_ADMINISTRATOR . DS . 'tables' . DS . 'vendors.php');
         }
+        
+        if (!class_exists ('VirtueMartCart')) {
+            require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
+        }
+        
     }
 
     /**
@@ -223,7 +228,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         $dbValues['tax_id'] = $method->tax_id;
         $dbValues['reference'] = $order['details']['BT']->virtuemart_order_id;
         
-		// storing data order into plugin data table
+        // storing data order into plugin data table
         $this->storePSPluginInternalData($dbValues);
         
         // performing PagSeguro transaction
@@ -261,11 +266,8 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
             $order['order_status'] = $newStatus;
             $order['customer_notified'] = 1;
             $order['comments'] = '';
-            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
             $order['paymentName'] = $payment_name;
-
-            // We delete the old stuff
-            $cart->emptyCart();
+            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
             
             // Redirecting to PagSeguro
             $application = JFactory::getApplication();
@@ -501,6 +503,24 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         return $this->setOnTablePluginParams($name, $id, $table);
     }
     
+    /**
+     * Process PagSeguro response URL
+     * @param String $html
+     * @return boolean
+     */
+    function plgVmOnPaymentResponseReceived (&$html) {
+        
+        // adding required classes
+        $this->_addRequiredClasses();
+        
+        //We delete the old stuff
+        // get the correct cart / session
+        $cart = VirtueMartCart::getCart ();
+        $cart->emptyCart ();
+        
+        return TRUE;
+    }
+    
     /*
     * plgVmOnPaymentNotification() - This event is fired by Offline Payment. It can be used to validate the payment data as entered by the user.
     * Return:
@@ -714,25 +734,26 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         $sender = (isset($order['details']['ST']) && (count($order['details']['ST'] > 0)) ? $order['details']['ST'] : $order['details']['BT']); 
         $paymentRequest->setSender($this->_generateSenderData($sender)); // sender
 
-        $paymentRequest->setShipping($this->_generateShippingData($sender)); // shipping
+        $paymentRequest->setShipping($this->_generateShippingData($sender, $cart->pricesUnformatted['salesPriceShipment'])); // shipping
         
         return $paymentRequest;
     }
-    
+
     /**
      * Gets extra amount cart values (coupon and shipping)
+     * @param VirtueMartCart $cart
+     * @return float
      */
     private function _getExtraAmountValues(VirtueMartCart $cart){
-        
-        $shipping = (float)$cart->pricesUnformatted['salesPriceShipment'];
         $coupon = (float)$cart->pricesUnformatted['salesPriceCoupon'];
         
-        return PagSeguroHelper::decimalFormat($shipping - $coupon);
+        return PagSeguroHelper::decimalFormat($coupon * (-1));
     }
     
     /**
-     *  Generates products data to PagSeguro transaction
-     *  @return Array PagSeguroItem
+     * Generates products data to PagSeguro transaction
+     * @param VirtueMartCart $cart
+     * @return array
      */
     private function _generateProductsData(VirtueMartCart $cart){
         
@@ -769,17 +790,20 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
         
         return $pagSeguroSender;
     }
-    
+
     /**
-     *  Generates shipping data to PagSeguro transaction
-     *  @return PagSeguroShipping
+     * Generates shipping data to PagSeguro transaction
+     * @param stdClass $deliveryAddress
+     * @param float $shippingCost
+     * @return \PagSeguroShipping
      */
-    private function _generateShippingData($deliveryAddress){
+    private function _generateShippingData($deliveryAddress, $shippingCost){
         
         $shipping = new PagSeguroShipping();
         $shipping->setAddress($this->_generateShippingAddressData($deliveryAddress));
         $shipping->setType($this->_generateShippingType());
-        
+        $shipping->setCost(PagSeguroHelper::decimalFormat((float)$shippingCost));
+
         return $shipping;
     }
     
@@ -820,6 +844,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      */
     private function _performPagSeguroRequest(PagSeguroPaymentRequest $pagSeguroPaymentRequest, TablePaymentmethods $method){
         
+        
         try {
             // setting PagSeguro configurations
             $this->_setPagSeguroConfiguration($method);
@@ -847,13 +872,13 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * Retrieve PagSeguro data configuration from database
      */
     private function _setPagSeguroConfiguration(TablePaymentmethods $method){
-        
+
         // retrieving configurated default charset
         PagSeguroConfig::setApplicationCharset($method->pagseguro_charset);
         
         // retrieving configurated default log info
         if ($method->pagseguro_log){
-            $filename = JPATH_BASE.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR.$method->pagseguro_log_file_name;
+            $filename = JPATH_BASE.$method->pagseguro_log_file_name;
             $this->_verifyFile($filename);
             PagSeguroConfig::activeLog($filename);
         }
@@ -909,6 +934,7 @@ class plgVmPaymentPagseguro extends vmPSPlugin {
      * @param string $filename
      */
     private function _verifyFile($filename){
+        
         try {
             $f = fopen($filename, 'a');
             fclose($f);
