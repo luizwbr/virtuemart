@@ -18,38 +18,39 @@
  ************************************************************************
  */
 
-class PagSeguroOrderStatusTranslation {
+class PagSeguroOrderStatusTranslation
+{
 
 	private static $order_status = array(
-		'INITIATED' => array(
+		'INITIATED'			 => array(
 			'br' => 'Iniciado',
 			'en' => 'Initiated'
 		),
-		'WAITING_PAYMENT' => array(
+		'WAITING_PAYMENT'	 => array(
 			'br' => 'Aguardando pagamento',
 			'en' => 'Waiting payment'
 		),
-		'IN_ANALYSIS' => array(
+		'IN_ANALYSIS'		 => array(
 			'br' => 'Em análise',
 			'en' => 'In analysis'
 		),
-		'PAID' => array(
+		'PAID'				 => array(
 			'br' => 'Paga',
 			'en' => 'Paid'
 		),
-		'AVAILABLE' => array(
+		'AVAILABLE'			 => array(
 			'br' => 'Disponível',
 			'en' => 'Available'
 		),
-		'IN_DISPUTE' => array(
+		'IN_DISPUTE'		 => array(
 			'br' => 'Em disputa',
 			'en' => 'In dispute'
 		),
-		'REFUNDED' => array(
+		'REFUNDED'			 => array(
 			'br' => 'Devolvida',
 			'en' => 'Refunded'
 		),
-		'CANCELLED' => array(
+		'CANCELLED'			 => array(
 			'br' => 'Cancelada',
 			'en' => 'Cancelled'
 		)
@@ -61,7 +62,8 @@ class PagSeguroOrderStatusTranslation {
 	 * @param string $lang_iso_code
 	 * @return string
 	 */
-	public static function getStatusTranslation($status, $lang_iso_code = 'br') {
+	public static function getStatusTranslation($status, $lang_iso_code = 'br')
+	{
 
 		if (isset(self::$order_status[$status][$lang_iso_code]))
 			return self::$order_status[$status][$lang_iso_code];
