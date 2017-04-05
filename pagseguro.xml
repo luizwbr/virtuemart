@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install version="1.1" type="plugin" group="vmpayment" method="upgrade">
+<extension version="2.5" type="plugin" group="vmpayment" method="upgrade">    
 	<name>Pagseguro</name>
-	<creationDate>Abril 2013</creationDate>
+	<creationDate>Abril 2017</creationDate>
 	<author>PagSeguro Internet LTDA.</author>
 	<authorUrl>https://pagseguro.uol.com.br</authorUrl>
 	<copyright>Copyright (C) UOL - O melhor conteúdo. Todos os direitos reservados.</copyright>
 	<license>http://www.apache.org/licenses/LICENSE-2.0</license>
-	<version>1.1</version>
-	<description>Receba pagamentos por cartão de crédito, transferência bancária e boleto.</description>
+	<version>1.2</version>
+	<description>Plugin de pagamento Pagseguro
+	&lt;div style=&quot;background:#E5F5FF;border:1px solid #99D6FF;padding:10px;margin:10px; -box-shadow: inset 0px 0px 10px #fff, 0px 0px 5px #ccc; -webkit-box-shadow: inset 0px 0px 10px #fff, 0px 0px 5px #ccc; -moz-box-shadow: inset 0px 0px 10px #fff, 0px 0px 5px #ccc;&quot;&gt;
+		Receba pagamentos por cartão de crédito, transferência bancária e boleto.
+		&lt;/div&gt;
+
+		&lt;div&gt;
+		Fork by Luiz Weber | Desenvolvido por PagSeguro UOL.
+		&lt;/div&gt;</description>
 	<files>
 		<filename plugin="pagseguro">pagseguro.php</filename>
 		<filename>pagseguroorderstatustranslation.php</filename>
@@ -17,43 +24,49 @@
 	<media folder="images" destination="/images/stories/virtuemart/payment">
 		<filename>pagseguro.jpg</filename>
 	</media>
-	<params addpath="/administrator/components/com_virtuemart/elements">
-		<param type="vmjpluginwarning" />
-		<param type="spacer" default="" level="level1" />
-		<param type="spacer" default="&lt;strong&gt;PagSeguro.&lt;/strong&gt; Receba pagamentos por cartão de crédito, transferência bancária e boleto." level="level1" />
-		<param type="spacer" default="" level="level1" />
-		<param type="spacer" default="Você precisa informar alguns dados antes de começar a usar o módulo de integração com PagSeguro." level="level1" />
-		<param type="spacer" default="" level="level1" />
-		<param name="payment_logos" type="vmfiles" label="LOGOTIPOS" description="VMPAYMENT_STANDARD_LOGOS_DESC" directory="/media/images/stories/virtuemart/payment" default="default" hide_default="1" hide_none="1" stripext="0" exclude="^_" />
-		<param type="spacer" default="" level="level1" />
-		<param type="text" name="pagseguro_email" size="55" label="EMAIL" default="informe seu e-mail cadastrado no PagSeguro" description="Para oferecer o PagSeguro em sua loja é preciso ter uma conta do tipo vendedor ou empresarial. Acesse o site www.pagseguro.com.br e crie uma conta grátis." />
-		<param type="spacer" default="" level="level1" />
-		<param type="text" name="pagseguro_token" size="55" label="TOKEN" default="informe seu token de segurança" description="Para utilizar qualquer serviço de integração do PagSeguro, é necessário ter um token de segurança. O token é um código único, gerado pelo PagSeguro. Caso não tenha um token, acesse o menu Integrações, em sua conta PagSeguro, para gerar um." />
-		<param type="spacer" default="" level="level1" />
-		<param type="text" name="pagseguro_url_redirect" label="URL DE REDIRECIONAMENTO" size="55" default="" description="Ao final do fluxo de pagamento no PagSeguro, seu cliente será redirecionado de volta para sua loja ou para a URL que você informar neste campo. Para utilizar essa funcionalidade você deve configurar sua conta para aceitar somente requisições de pagamentos gerados via API. Para mais detalhes leia o readme que acompanha o módulo." />
-		<param type="spacer" default="" level="level1" />
-		<param type="text" name="pagseguro_url_notification" label="URL DE NOTIFICAÇÃO" size="55" default="" description="Ao final do processo de pagamento ou toda vez que uma transação mudar de status, o PagSeguro manda uma notificação via HTTP POST para sua loja ou para a URL que você informar neste campo, entretanto, você deve ativar o serviço de Notificação de Transações e informar a URL de Notificação." />
-		<param type="spacer" default="" level="level1" />
-		<param type="radio" name="pagseguro_charset" label="CHARSET" default="UTF-8" description="Informe a codificação utilizada pelo seu sistema. Isso irá prevenir que as transações gerem possíveis erros ou quebras ou ainda que caracteres especiais possam ser apresentados de maneira diferente do habitual.">
-			<option value="UTF-8">UTF-8</option>
-			<option value="ISO-8859-1">ISO-8859-1</option>
-		</param>
-		<param type="spacer" default="" level="level1" />
-		<param type="radio" name="pagseguro_log" label="LOG" default="0" description="Deseja habilitar a geração de log?">
-			<option value="0">COM_VIRTUEMART_NO</option>
-			<option value="1">COM_VIRTUEMART_YES</option>
-		</param>
-		<param type="spacer" default="" level="level1" />
-		<param type="text" name="pagseguro_log_file_name" label="DIRETÓRIO" size="55" default="" description="Diretório a partir da raiz de instalação do VirtueMart onde se deseja criar o arquivo de log, ex.: /logs/log_ps.log" />
-		<param type="spacer" default="" level="level1" />
-		<param type="spacer" default="&lt;strong&gt;Status da compra. Entenda melhor &lt;a href='https://pagseguro.uol.com.br/v2/guia-de-integracao/api-de-notificacoes.html#v2-item-api-de-notificacoes-status-da-transacao' target='_blank'&gt;clicando aqui&lt;/a&gt;&lt;/strong&gt;" />
-		<param type="spacer" default="" level="level1" />
-		<param name="status_waiting_payment" type="vmorderstate" default="P" label="AGUARDANDO PAGAMENTO" description="O comprador iniciou a transação, mas até o momento o PagSeguro não recebeu nenhuma informação sobre o pagamento." />
-		<param name="status_in_analysis" type="vmorderstate" default="P" label="EM ANÁLISE" description="O comprador optou por pagar com um cartão de crédito e o PagSeguro está analisando o risco da transação." />
-		<param name="status_paid" type="vmorderstate" default="U" label="PAGO" description="A transação foi paga pelo comprador e o PagSeguro já recebeu uma confirmação da instituição financeira responsável pelo processamento." />
-		<param name="status_available" type="vmorderstate" default="C" label="DISPONÍVEL" description="A transação foi paga e chegou ao final de seu prazo de liberação sem ter sido retornada e sem que haja nenhuma disputa aberta." />
-		<param name="status_in_dispute" type="vmorderstate" default="P" label="EM DISPUTA" description="O comprador, dentro do prazo de liberação da transação, abriu uma disputa." />
-		<param name="status_refunded" type="vmorderstate" default="R" label="DEVOLVIDO" description="O valor da transação foi devolvido para o comprador." />
-		<param name="status_cancelled" type="vmorderstate" default="X" label="CANCELADO" description="A transação foi cancelada sem ter sido finalizada." />
-	</params>
-</install>
+	<config>        
+        <fields name="params" addfieldpath="/administrator/components/com_virtuemart/elements">
+            <fieldset name="basic">               
+	      
+				<field type="vmjpluginwarning" />
+				<field type="spacer" default="" level="level1" />
+				<field type="spacer" default="&lt;strong&gt;PagSeguro.&lt;/strong&gt; Receba pagamentos por cartão de crédito, transferência bancária e boleto." level="level1" />
+				<field type="spacer" default="" level="level1" />
+				<field type="spacer" default="Você precisa informar alguns dados antes de começar a usar o módulo de integração com PagSeguro." level="level1" />
+				<field type="spacer" default="" level="level1" />
+				<field name="payment_logos" type="vmfiles" label="LOGOTIPOS" description="VMPAYMENT_STANDARD_LOGOS_DESC" directory="/media/images/stories/virtuemart/payment" default="default" hide_default="1" hide_none="1" stripext="0" exclude="^_" />
+				<field type="spacer" default="" level="level1" />
+				<field type="text" name="pagseguro_email" size="55" label="EMAIL" default="informe seu e-mail cadastrado no PagSeguro" description="Para oferecer o PagSeguro em sua loja é preciso ter uma conta do tipo vendedor ou empresarial. Acesse o site www.pagseguro.com.br e crie uma conta grátis." />
+				<field type="spacer" default="" level="level1" />
+				<field type="text" name="pagseguro_token" size="55" label="TOKEN" default="informe seu token de segurança" description="Para utilizar qualquer serviço de integração do PagSeguro, é necessário ter um token de segurança. O token é um código único, gerado pelo PagSeguro. Caso não tenha um token, acesse o menu Integrações, em sua conta PagSeguro, para gerar um." />
+				<field type="spacer" default="" level="level1" />
+				<field type="text" name="pagseguro_url_redirect" label="URL DE REDIRECIONAMENTO" size="55" default="" description="Ao final do fluxo de pagamento no PagSeguro, seu cliente será redirecionado de volta para sua loja ou para a URL que você informar neste campo. Para utilizar essa funcionalidade você deve configurar sua conta para aceitar somente requisições de pagamentos gerados via API. Para mais detalhes leia o readme que acompanha o módulo." />
+				<field type="spacer" default="" level="level1" />
+				<field type="text" name="pagseguro_url_notification" label="URL DE NOTIFICAÇÃO" size="55" default="" description="Ao final do processo de pagamento ou toda vez que uma transação mudar de status, o PagSeguro manda uma notificação via HTTP POST para sua loja ou para a URL que você informar neste campo, entretanto, você deve ativar o serviço de Notificação de Transações e informar a URL de Notificação." />
+				<field type="spacer" default="" level="level1" />
+				<field type="radio" name="pagseguro_charset" label="CHARSET" default="UTF-8" description="Informe a codificação utilizada pelo seu sistema. Isso irá prevenir que as transações gerem possíveis erros ou quebras ou ainda que caracteres especiais possam ser apresentados de maneira diferente do habitual.">
+					<option value="UTF-8">UTF-8</option>
+					<option value="ISO-8859-1">ISO-8859-1</option>
+				</field>
+				<field type="spacer" default="" level="level1" />
+				<field type="radio" name="pagseguro_log" label="LOG" default="0" description="Deseja habilitar a geração de log?">
+					<option value="0">COM_VIRTUEMART_NO</option>
+					<option value="1">COM_VIRTUEMART_YES</option>
+				</field>
+				<field type="spacer" default="" level="level1" />
+				<field type="text" name="pagseguro_log_file_name" label="DIRETÓRIO" size="55" default="" description="Diretório a partir da raiz de instalação do VirtueMart onde se deseja criar o arquivo de log, ex.: /logs/log_ps.log" />
+				<field type="spacer" default="" level="level1" />
+				<field type="spacer" default="&lt;strong&gt;Status da compra. Entenda melhor &lt;a href='https://pagseguro.uol.com.br/v2/guia-de-integracao/api-de-notificacoes.html#v2-item-api-de-notificacoes-status-da-transacao' target='_blank'&gt;clicando aqui&lt;/a&gt;&lt;/strong&gt;" />
+
+				<field type="spacer" default="" level="level1" />
+				<field name="status_waiting_payment" type="vmorderstate" default="P" label="AGUARDANDO PAGAMENTO" description="O comprador iniciou a transação, mas até o momento o PagSeguro não recebeu nenhuma informação sobre o pagamento." />
+				<field name="status_in_analysis" type="vmorderstate" default="P" label="EM ANÁLISE" description="O comprador optou por pagar com um cartão de crédito e o PagSeguro está analisando o risco da transação." />
+				<field name="status_paid" type="vmorderstate" default="U" label="PAGO" description="A transação foi paga pelo comprador e o PagSeguro já recebeu uma confirmação da instituição financeira responsável pelo processamento." />
+				<field name="status_available" type="vmorderstate" default="C" label="DISPONÍVEL" description="A transação foi paga e chegou ao final de seu prazo de liberação sem ter sido retornada e sem que haja nenhuma disputa aberta." />
+				<field name="status_in_dispute" type="vmorderstate" default="P" label="EM DISPUTA" description="O comprador, dentro do prazo de liberação da transação, abriu uma disputa." />
+				<field name="status_refunded" type="vmorderstate" default="R" label="DEVOLVIDO" description="O valor da transação foi devolvido para o comprador." />
+				<field name="status_cancelled" type="vmorderstate" default="X" label="CANCELADO" description="A transação foi cancelada sem ter sido finalizada." />
+			</fieldset>
+		</fields>
+	</config>
+</extension>

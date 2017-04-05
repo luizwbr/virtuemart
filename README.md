@@ -13,8 +13,8 @@ Com o módulo instalado e configurado, você pode pode oferecer o PagSeguro como
 Requisitos
 ----------
 ---
- - [Joomla] 2.5.9
- - [VirtueMart] 2.0.18
+ - [Joomla] 3.6.x
+ - [VirtueMart] 3.x
  - [PHP] 5.1.6+
  - [SPL]
  - [cURL]
@@ -57,6 +57,9 @@ Opcionalmente você pode mudar o relacionamento feito entre os status de pagamen
 Changelog
 ---------
 ---
+1.2
+ - Compatibilidade com Virtuemart 3.x
+
 1.1
 
  - Adicionado: Integração com API de Notificação.

@@ -513,6 +513,18 @@ class plgVmPaymentPagseguro extends vmPSPlugin
 		return $this->declarePluginParams('payment', $name, $id, $data);
 	}
 
+	    
+    /**
+     * @param $name
+     * @param $id
+     * @param $data
+     * @return bool
+     */
+    function plgVmDeclarePluginParamsPaymentVM3( &$data) {
+        return $this->declarePluginParams('payment', $data);
+    }
+
+
 	/**
 	 * Fired in payment method when click save into
 	 * payment method info view
